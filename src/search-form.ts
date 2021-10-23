@@ -1,6 +1,24 @@
 import { renderBlock } from './lib.js'
 
-export function renderSearchFormBlock () {
+const generateStartDate = (): Date => {
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  return tomorrow
+}
+
+const generateEndDate = (start: Date): Date => {
+  const endDate = new Date(start)
+  endDate.setDate(endDate.getDate() + 2)
+  return endDate
+}
+
+export function renderSearchFormBlock (start = generateStartDate(), end = generateEndDate(start)) {
+  if (end < start) {
+    end = generateEndDate(start)
+  }
+  const currentDay = new Date()
+  const lastDay = new Date(currentDay.getFullYear(), currentDay.getMonth() + 2, 0)
+
   renderBlock(
     'search-form-block',
     `
@@ -20,11 +38,19 @@ export function renderSearchFormBlock () {
         <div class="row">
           <div>
             <label for="check-in-date">Дата заезда</label>
-            <input id="check-in-date" type="date" value="2021-05-11" min="2021-05-11" max="2021-06-30" name="checkin" />
+            <input id="check-in-date" type="date" 
+            value=${start.toISOString().split('T')[0]} 
+            min=${currentDay.toISOString().split('T')[0]} 
+            max=${lastDay.toISOString().split('T')[0]} 
+            name="checkin" />
           </div>
           <div>
             <label for="check-out-date">Дата выезда</label>
-            <input id="check-out-date" type="date" value="2021-05-13" min="2021-05-11" max="2021-06-30" name="checkout" />
+            <input id="check-out-date" type="date" 
+            value=${end.toISOString().split('T')[0]} 
+            min=${currentDay.toISOString().split('T')[0]} 
+            max=${lastDay.toISOString().split('T')[0]} 
+            name="checkout" />
           </div>
           <div>
             <label for="max-price">Макс. цена суток</label>
