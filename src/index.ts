@@ -1,10 +1,13 @@
 import { renderSearchFormBlock } from './search-form.js'
 import { renderSearchStubBlock } from './search-results.js'
-import { renderUserBlock } from './user.js'
+import {getFavoritesAmount, getUserData, renderUserBlock} from './user.js'
 import { renderToast } from './lib.js'
 
+const user = getUserData()
+const favoritesAmount = getFavoritesAmount()
+
 window.addEventListener('DOMContentLoaded', () => {
-  renderUserBlock('Wade Warren', "/img/avatar.png", 0)
+  renderUserBlock(user.username, user.avatarUrl, favoritesAmount)
   renderSearchFormBlock()
   renderSearchStubBlock()
   renderToast(
