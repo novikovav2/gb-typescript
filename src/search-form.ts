@@ -1,5 +1,28 @@
 import { renderBlock } from './lib.js'
 
+interface SearchFormData {
+  city: string,
+  checkIn: Date,
+  checkOut: Date,
+  price: number
+}
+
+interface Place {
+
+}
+
+interface searchCallback {
+  (error? :Error, results?: Place[]): void
+}
+
+const callback: searchCallback = (error, result) => {
+  if (error == null) {
+    console.log(result)
+  } else {
+    console.error(error)
+  }
+}
+
 const generateStartDate = (): Date => {
   const tomorrow = new Date()
   tomorrow.setDate(tomorrow.getDate() + 1)
@@ -12,6 +35,17 @@ const generateEndDate = (start: Date): Date => {
   return endDate
 }
 
+const search = (data: SearchFormData, callback: (error? :Error, results?: Place[]) => void): void => {
+  setTimeout(() => {
+    if (Math.random() > 0.5) {
+      callback(null, [])
+    } else {
+      const error = new Error('Something bad happened')
+      callback(error)
+    }
+  }, 3000)
+}
+
 export function renderSearchFormBlock (start = generateStartDate(), end = generateEndDate(start)) {
   if (end < start) {
     end = generateEndDate(start)
@@ -22,7 +56,7 @@ export function renderSearchFormBlock (start = generateStartDate(), end = genera
   renderBlock(
     'search-form-block',
     `
-    <form>
+    <form id="search">
       <fieldset class="search-filedset">
         <div class="row">
           <div>
@@ -57,11 +91,29 @@ export function renderSearchFormBlock (start = generateStartDate(), end = genera
             <input id="max-price" type="text" value="" name="price" class="max-price" />
           </div>
           <div>
-            <div><button>Найти</button></div>
+            <div><button type="submit">Найти</button></div>
           </div>
         </div>
       </fieldset>
     </form>
     `
   )
+
+  const form = document.getElementById("search")
+  form.addEventListener('submit', (event) => {
+    event.preventDefault()
+    const city = <HTMLInputElement>document.getElementById('city')
+    const checkIn = <HTMLInputElement>document.getElementById('check-in-date')
+    const checkOut = <HTMLInputElement>document.getElementById('check-out-date')
+    const price = <HTMLInputElement>document.getElementById('max-price')
+
+    const searchQuery: SearchFormData = {
+      city: city.value,
+      checkIn: new Date(checkIn.value),
+      checkOut: new Date(checkOut.value),
+      price: +price.value
+    }
+
+    search(searchQuery, callback)
+  })
 }
