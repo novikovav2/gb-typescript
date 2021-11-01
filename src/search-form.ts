@@ -1,4 +1,5 @@
 import { renderBlock } from './lib.js'
+import {renderEmptyOrErrorSearchBlock, renderSearchResultsBlock} from "./search-results.js";
 
 interface SearchFormData {
   city: string,
@@ -7,8 +8,20 @@ interface SearchFormData {
   price: number
 }
 
-interface Place {
+export interface Place {
+  id: number,
+  name: string,
+  description: string,
+  image: string,
+  remoteness: number,
+  bookedDates: [],
+  price: number
+}
 
+interface searchResult {
+  places: {
+    [key: number]: Place
+  }
 }
 
 interface searchCallback {
@@ -17,9 +30,9 @@ interface searchCallback {
 
 const callback: searchCallback = (error, result) => {
   if (error == null) {
-    console.log(result)
+    renderSearchResultsBlock(result)
   } else {
-    console.error(error)
+    renderEmptyOrErrorSearchBlock(error)
   }
 }
 
@@ -35,15 +48,35 @@ const generateEndDate = (start: Date): Date => {
   return endDate
 }
 
+const fetchData = <T>(url: string): Promise<T> => {
+  return fetch(url)
+    .then(response => {
+      if (response.ok) {
+        return response.json()
+      } else {
+        throw new Error(response.statusText)
+      }
+    })
+}
+
 const search = (data: SearchFormData, callback: (error? :Error, results?: Place[]) => void): void => {
-  setTimeout(() => {
-    if (Math.random() > 0.5) {
-      callback(null, [])
-    } else {
-      const error = new Error('Something bad happened')
+  // setTimeout(() => {
+  //   if (Math.random() > 0.5) {
+  //     callback(null, [])
+  //   } else {
+  //     const error = new Error('Something bad happened')
+  //     callback(error)
+  //   }
+  // }, 3000)
+
+  fetchData<searchResult>('http://localhost:3000/gistfile1.json')
+    .then(response => {
+      const places: Array<Place> = Object.keys(response.places).map(key => response.places[key])
+      callback(null, places)
+    })
+    .catch(error => {
       callback(error)
-    }
-  }, 3000)
+    })
 }
 
 export function renderSearchFormBlock (start = generateStartDate(), end = generateEndDate(start)) {
